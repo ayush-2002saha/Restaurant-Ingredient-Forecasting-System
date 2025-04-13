@@ -1,0 +1,272 @@
+{% extends "ingredient_forecast/base.html" %}
+{% load static %}
+
+{% block title %}Forecast Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="section__title">Forecast Settings</h1>
+    <span class="section__subtitle">Configure your forecasting preferences</span>
+    
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="card text-white">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+                        General Settings
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="algorithm-tab" data-bs-toggle="tab" data-bs-target="#algorithm" type="button" role="tab" aria-controls="algorithm" aria-selected="false">
+                        Algorithm Settings
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="factors-tab" data-bs-toggle="tab" data-bs-target="#factors" type="button" role="tab" aria-controls="factors" aria-selected="false">
+                        Influencing Factors
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <!-- General Settings Tab -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                    <form method="post" action="{% url 'ingredient_forecast:save_general_settings' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="forecast_horizon" class="form-label">Forecast Horizon (days)</label>
+                            <input type="number" class="form-control" id="forecast_horizon" name="forecast_horizon" value="{{ settings.forecast_horizon }}" min="1" max="90">
+                            <div class="form-text">Number of days to forecast into the future</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="history_period" class="form-label">Historical Data Period (days)</label>
+                            <input type="number" class="form-control" id="history_period" name="history_period" value="{{ settings.history_period }}" min="7" max="365">
+                            <div class="form-text">Number of days of historical data to use for forecasting</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update_frequency" class="form-label">Update Frequency</label>
+                            <select class="form-select" id="update_frequency" name="update_frequency">
+                                <option value="daily" {% if settings.update_frequency == 'daily' %}selected{% endif %}>Daily</option>
+                                <option value="weekly" {% if settings.update_frequency == 'weekly' %}selected{% endif %}>Weekly</option>
+                                <option value="manual" {% if settings.update_frequency == 'manual' %}selected{% endif %}>Manual Only</option>
+                            </select>
+                            <div class="form-text">How often the forecast should be updated automatically</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notification_threshold" class="form-label">Notification Threshold (%)</label>
+                            <input type="number" class="form-control" id="notification_threshold" name="notification_threshold" value="{{ settings.notification_threshold }}" min="1" max="100">
+                            <div class="form-text">Threshold for variance notifications</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save General Settings</button>
+                    </form>
+                </div>
+                
+                <!-- Algorithm Settings Tab -->
+                <div class="tab-pane fade" id="algorithm" role="tabpanel" aria-labelledby="algorithm-tab">
+                    <form method="post" action="/save-algorithm-settings/">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="algorithm_type" class="form-label">Forecasting Algorithm</label>
+                            <select class="form-select" id="algorithm_type" name="algorithm_type">
+                                <option value="naive" {% if settings.algorithm_type == 'naive' %}selected{% endif %}>Naive Forecast</option>
+                                <option value="moving_average" {% if settings.algorithm_type == 'moving_average' %}selected{% endif %}>Moving Average</option>
+                                <option value="exponential_smoothing" {% if settings.algorithm_type == 'exponential_smoothing' %}selected{% endif %}>Exponential Smoothing</option>
+                                <option value="arima" {% if settings.algorithm_type == 'arima' %}selected{% endif %}>ARIMA</option>
+                                <option value="prophet" {% if settings.algorithm_type == 'prophet' %}selected{% endif %}>Prophet</option>
+                            </select>
+                            <div class="form-text">Select the forecasting algorithm to use</div>
+                        </div>
+                        
+                        <div id="moving_average_params" class="algorithm-params mb-3 {% if settings.algorithm_type != 'moving_average' %}d-none{% endif %}">
+                            <label for="window_size" class="form-label">Window Size</label>
+                            <input type="number" class="form-control" id="window_size" name="window_size" value="{{ settings.window_size }}" min="1" max="30">
+                            <div class="form-text">Number of periods to include in the moving average</div>
+                        </div>
+                        
+                        <div id="exponential_smoothing_params" class="algorithm-params mb-3 {% if settings.algorithm_type != 'exponential_smoothing' %}d-none{% endif %}">
+                            <label for="alpha" class="form-label">Alpha (Smoothing Factor)</label>
+                            <input type="range" class="form-range" id="alpha" name="alpha" min="0.1" max="0.9" step="0.1" value="{{ settings.alpha }}">
+                            <div class="text-center mb-3"><span id="alpha_value">{{ settings.alpha }}</span></div>
+                            <div class="form-text">Higher alpha gives more weight to recent observations</div>
+                        </div>
+                        
+                        <div id="arima_params" class="algorithm-params mb-3 {% if settings.algorithm_type != 'arima' %}d-none{% endif %}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="p_value" class="form-label">p (AR Order)</label>
+                                    <input type="number" class="form-control" id="p_value" name="p_value" value="{{ settings.p_value }}" min="0" max="5">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="d_value" class="form-label">d (Differencing)</label>
+                                    <input type="number" class="form-control" id="d_value" name="d_value" value="{{ settings.d_value }}" min="0" max="2">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="q_value" class="form-label">q (MA Order)</label>
+                                    <input type="number" class="form-control" id="q_value" name="q_value" value="{{ settings.q_value }}" min="0" max="5">
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">ARIMA model parameters</div>
+                        </div>
+                        
+                        <div id="prophet_params" class="algorithm-params mb-3 {% if settings.algorithm_type != 'prophet' %}d-none{% endif %}">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="seasonality_mode" name="seasonality_mode" {% if settings.seasonality_mode %}checked{% endif %}>
+                                <label class="form-check-label" for="seasonality_mode">
+                                    Include Seasonality
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="include_holidays" name="include_holidays" {% if settings.include_holidays %}checked{% endif %}>
+                                <label class="form-check-label" for="include_holidays">
+                                    Include Holidays
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confidence_interval" class="form-label">Confidence Interval (%)</label>
+                            <input type="number" class="form-control" id="confidence_interval" name="confidence_interval" value="{{ settings.confidence_interval }}" min="50" max="99">
+                            <div class="form-text">Confidence interval for forecasts</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Algorithm Settings</button>
+                    </form>
+                </div>
+                
+                <!-- Influencing Factors Tab -->
+                <div class="tab-pane fade" id="factors" role="tabpanel" aria-labelledby="factors-tab">
+                    <form method="post" action="/save_factor_settings/">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="consider_weather" name="consider_weather" {% if settings.consider_weather %}checked{% endif %}>
+                                <label class="form-check-label" for="consider_weather">Consider Weather Forecasts</label>
+                            </div>
+                            <div class="form-text">Include weather forecasts in demand predictions</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="consider_events" name="consider_events" {% if settings.consider_events %}checked{% endif %}>
+                                <label class="form-check-label" for="consider_events">Consider Special Events</label>
+                            </div>
+                            <div class="form-text">Include special events (holidays, promotions) in demand predictions</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="consider_seasonality" name="consider_seasonality" {% if settings.consider_seasonality %}checked{% endif %}>
+                                <label class="form-check-label" for="consider_seasonality">Consider Seasonality</label>
+                            </div>
+                            <div class="form-text">Include seasonal patterns in demand predictions</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="consider_trends" name="consider_trends" {% if settings.consider_trends %}checked{% endif %}>
+                                <label class="form-check-label" for="consider_trends">Consider Long-Term Trends</label>
+                            </div>
+                            <div class="form-text">Include long-term trends in demand predictions</div>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">Customized Factors</h5>
+                        <div id="custom_factors">
+                            {% for factor in custom_factors %}
+                            <div class="custom-factor mb-3 row">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" name="factor_name[]" value="{{ factor.name }}" placeholder="Factor Name">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="number" class="form-control" name="factor_weight[]" value="{{ factor.weight }}" min="0.1" max="5" step="0.1" placeholder="Weight">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-outline-danger remove-factor">Remove</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <button type="button" id="add_factor" class="btn btn-outline-secondary mb-3">Add Custom Factor</button>
+                        <button type="submit" class="btn btn-primary d-block">Save Factor Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide algorithm specific parameters
+        const algorithmSelect = document.getElementById('algorithm_type');
+        const algorithmParams = document.querySelectorAll('.algorithm-params');
+        
+        algorithmSelect.addEventListener('change', function() {
+            algorithmParams.forEach(param => {
+                param.classList.add('d-none');
+            });
+            
+            const selectedAlgorithm = this.value;
+            const targetParams = document.getElementById(selectedAlgorithm + '_params');
+            if (targetParams) {
+                targetParams.classList.remove('d-none');
+            }
+        });
+        
+        // Alpha range value display
+        const alphaSlider = document.getElementById('alpha');
+        const alphaValue = document.getElementById('alpha_value');
+        
+        if (alphaSlider && alphaValue) {
+            alphaSlider.addEventListener('input', function() {
+                alphaValue.textContent = this.value;
+            });
+        }
+        
+        // Add custom factor
+        document.getElementById('add_factor').addEventListener('click', function() {
+            const customFactorsContainer = document.getElementById('custom_factors');
+            const newFactor = document.createElement('div');
+            newFactor.className = 'custom-factor mb-3 row';
+            newFactor.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="factor_name[]" placeholder="Factor Name">
+                </div>
+                <div class="col-md-5">
+                    <input type="number" class="form-control" name="factor_weight[]" min="0.1" max="5" step="0.1" value="1.0" placeholder="Weight">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger remove-factor">Remove</button>
+                </div>
+            `;
+            customFactorsContainer.appendChild(newFactor);
+            
+            // Add event listener to the new remove button
+            newFactor.querySelector('.remove-factor').addEventListener('click', function() {
+                customFactorsContainer.removeChild(newFactor);
+            });
+        });
+        
+        // Remove custom factor
+        document.querySelectorAll('.remove-factor').forEach(button => {
+            button.addEventListener('click', function() {
+                const factor = this.closest('.custom-factor');
+                factor.parentNode.removeChild(factor);
+            });
+        });
+    });
+</script>
+{% endblock %}

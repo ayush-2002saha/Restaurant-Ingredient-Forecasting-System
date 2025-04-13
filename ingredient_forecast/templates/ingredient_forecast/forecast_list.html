@@ -1,0 +1,91 @@
+{% extends 'ingredient_forecast/base.html' %}
+{% load static math_filters %}
+
+{% block title %}Ingredient Forecast - Restaurant Forecasting{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom text-white">
+    <h1 class="h2">Ingredient Forecast</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'ingredient_forecast:cost_forecast' %}" class="btn btn-sm btn-outline-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
+                    <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>
+                </svg>
+                Cost Forecast
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center text-white">
+            <span>Forecasted Ingredient Requirements</span>
+            <span>Forecasting {{ settings.forecast_months }} months ahead</span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if no_data %}
+            <div class="alert alert-warning">
+                <h4 class="alert-heading">No Data Available</h4>
+                <p>There is not enough historical order data to generate a forecast. Please add order data via the Admin Panel.</p>
+                <hr>
+                <p class="mb-0">
+                    <a href="/admin/ingredient_forecast/order/add/" class="btn btn-sm btn-warning">Add Orders</a>
+                </p>
+            </div>
+        {% else %}
+            <ul class="nav nav-tabs mb-3" id="monthTabs" role="tablist">
+                {% for month in months %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                            id="month-{{ month }}-tab" 
+                            data-bs-toggle="tab" 
+                            data-bs-target="#month-{{ month }}" 
+                            type="button" 
+                            role="tab" 
+                            aria-controls="month-{{ month }}" 
+                            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                        {{ month }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="tab-content" id="monthTabsContent">
+                {% for month in months %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                     id="month-{{ month }}" 
+                     role="tabpanel" 
+                     aria-labelledby="month-{{ month }}-tab">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Ingredient</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for forecast in forecasts %}
+                                    {% if forecast.month == month %}
+                                    <tr>
+                                        <td>{{ forecast.ingredient_name }}</td>
+                                        <td>{{ forecast.quantity|floatformat:2 }}</td>
+                                        <td>{{ forecast.unit }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

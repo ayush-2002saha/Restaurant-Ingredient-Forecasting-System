@@ -1,0 +1,142 @@
+{% extends 'ingredient_forecast/base.html' %}
+
+{% block title %}Contributors{% endblock %}
+
+{% block content %}
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Space+Mono&family=Roboto+Mono&family=Source+Code+Pro&family=Inconsolata&family=VT323&display=swap" rel="stylesheet">
+
+<style>
+    .contributors-wrapper {
+        padding: 80px 20px;
+        background-color: #112240;
+        display: flex;
+        justify-content: center;
+    }
+
+    .contributors-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        width: 70%;
+        max-width: 900px;
+    }
+
+    .contributor-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .typewriter {
+        white-space: nowrap;
+        font-size: 2rem;
+        color: white;
+        text-decoration: none;
+        width: 0;
+        overflow: hidden;
+        border-right: none;
+        animation: typing 1.5s steps(20, end) forwards;
+        font-family: 'Courier New', monospace;
+        transition: color 0.3s ease, font 0.5s ease;
+    }
+
+    .roll-number {
+        font-size: 1.25rem;
+        color: white;
+        opacity: 0;
+        font-family: 'Courier New', monospace;
+        animation: fadeIn 0.6s forwards;
+    }
+
+    /* HOVER font-family changes */
+    .row-1 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'Fira Code', monospace;
+    }
+
+    .row-2 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'Space Mono', monospace;
+    }
+
+    .row-3 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'Roboto Mono', monospace;
+    }
+
+    .row-4 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'Source Code Pro', monospace;
+    }
+
+    .row-5 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'Inconsolata', monospace;
+    }
+
+    .row-6 .typewriter:hover {
+        color: #fffeaf;
+        font-family: 'VT323', monospace;
+    }
+
+    /* Animation delays */
+    .row-1 .typewriter { animation-delay: 0.5s; }
+    .row-1 .roll-number { animation-delay: 0.5s; }
+
+    .row-2 .typewriter { animation-delay: 1.2s; }
+    .row-2 .roll-number { animation-delay: 1.2s; }
+
+    .row-3 .typewriter { animation-delay: 1.5s; }
+    .row-3 .roll-number { animation-delay: 1.5s; }
+
+    .row-4 .typewriter { animation-delay: 1.8s; }
+    .row-4 .roll-number { animation-delay: 1.8s; }
+
+    .row-5 .typewriter { animation-delay: 2s; }
+    .row-5 .roll-number { animation-delay: 2s; }
+
+    .row-6 .typewriter { animation-delay: 2.2s; }
+    .row-6 .roll-number { animation-delay: 2.2s; }
+
+    @keyframes typing {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+
+
+<div class="contributors-wrapper">
+    <div class="contributors-container">
+        <div class="contributor-row row-1">
+            <a href="https://github.com/Sattwiksen26" target="_blank" class="typewriter">Sattwik Sen</a>
+            <span class="roll-number">2105403</span>
+        </div>
+        <div class="contributor-row row-2">
+            <a href="https://github.com/MVishal01" target="_blank" class="typewriter">Vishal Mondal</a>
+            <span class="roll-number">21051868</span>
+        </div>
+        <div class="contributor-row row-3">
+            <a href="https://github.com/ayush-2002saha" target="_blank" class="typewriter">Ayush Saha</a>
+            <span class="roll-number">21052149</span>
+        </div>
+        <div class="contributor-row row-4">
+            <a href="https://github.com/Priyo-12g" target="_blank" class="typewriter">Priyabrata Ghosh</a>
+            <span class="roll-number">21052170</span>
+        </div>
+        <div class="contributor-row row-5">
+            <a href="https://github.com/Satyaki-Ghosh" target="_blank" class="typewriter">Satyaki Ghosh</a>
+            <span class="roll-number">21052186</span>
+        </div>
+        <div class="contributor-row row-6">
+            <a href="https://github.com/sdm2204" target="_blank" class="typewriter">Swapna Dip Mandal</a>
+            <span class="roll-number">21052204</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

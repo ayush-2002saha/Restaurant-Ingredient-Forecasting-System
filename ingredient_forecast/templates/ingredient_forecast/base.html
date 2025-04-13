@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Ingredient Forecasting</title>
+    
+    <!-- FAVICON -->
+    <link rel="shortcut icon" href="#" type="image/x-icon">
+    
+    <!-- REMIXICONS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.min.css" rel="stylesheet">
+    
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /*=============== GOOGLE FONTS ===============*/
+        @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+
+        /*=============== VARIABLES CSS ===============*/
+        :root {
+            --header-height: 4.5rem;
+
+            /*========== Colors ==========*/
+            /*Color mode HSL(hue, saturation, lightness)*/
+            --first-color: #f0f0f0;
+            --second-color: #131313;
+            --accent-color: #64ffda;
+            --text-color: #8892b0;
+            --text-color-light: #a8b2d1;
+            --white-color: #e6f1ff;
+            --body-color: #0a192f;
+            --container-color: #112240;
+
+            /*========== Font and typography ==========*/
+            --body-font: 'Space Grotesk', sans-serif;
+            --h1-font-size: 2.5rem;
+            --h2-font-size: 1.75rem;
+            --h3-font-size: 1.25rem;
+            --normal-font-size: 1rem;
+            --small-font-size: .875rem;
+            --smaller-font-size: .75rem;
+
+            /*========== Font weight ==========*/
+            --font-light: 300;
+            --font-normal: 400;
+            --font-medium: 500;
+            --font-semi-bold: 600;
+            --font-bold: 700;
+
+            /*========== z index ==========*/
+            --z-tooltip: 10;
+            --z-fixed: 100;
+        }
+
+        /*=============== BASE ===============*/
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--body-font);
+            font-size: var(--normal-font-size);
+            background-color: var(--body-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--white-color);
+            font-weight: var(--font-semi-bold);
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--white-color);
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /*=============== REUSABLE CSS CLASSES ===============*/
+        .container {
+            max-width: 1200px;
+            margin-inline: auto;
+            padding-inline: 1.5rem;
+        }
+
+        .section {
+            padding-block: 5rem 2rem;
+        }
+
+        .section__title {
+            font-size: var(--h2-font-size);
+            margin-bottom: 1.25rem;
+            color: var(--white-color);
+        }
+
+        .section__subtitle {
+            display: block;
+            font-size: var(--small-font-size);
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section__title, 
+        .section__subtitle {
+            text-align: center;
+        }
+
+        .main {
+            overflow: hidden;
+            padding-top: var(--header-height);
+        }
+
+        /*=============== HEADER & NAV ===============*/
+        .header {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: var(--z-fixed);
+            transition: background-color 0.3s;
+        }
+
+        .nav {
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav__logo {
+            color: var(--white-color);
+            font-weight: var(--font-bold);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav__logo-icon {
+            color: var(--accent-color);
+            margin-right: .5rem;
+            font-size: 1.25rem;
+        }
+
+        .nav__list {
+            display: flex;
+            column-gap: 2.5rem;
+        }
+
+        .nav__link {
+            color: var(--white-color);
+            font-weight: var(--font-medium);
+            font-size: var(--small-font-size);
+            transition: color .3s;
+            position: relative;
+        }
+
+        .nav__link::after {
+            content: '';
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            background-color: var(--accent-color);
+            bottom: -4px;
+            left: 0;
+            transition: width .3s;
+        }
+
+        .nav__link:hover::after {
+            width: 100%;
+        }
+
+        .nav__close,
+        .nav__toggle {
+            display: none;
+        }
+
+        /* Active link */
+        .active-link {
+            color: var(--accent-color);
+        }
+
+        .active-link::after {
+            width: 100%;
+        }
+
+        /*=============== HOME ===============*/
+        .home {
+            position: relative;
+            overflow: hidden;
+            padding-top: 4rem;
+        }
+
+        .home__container {
+            position: relative;
+            padding-top: 2rem;
+        }
+
+        .home__data {
+            text-align: center;
+        }
+
+        .home__title {
+            font-size: var(--h1-font-size);
+            margin-bottom: 1rem;
+            color: var(--white-color);
+        }
+
+        .home__subtitle {
+            font-size: var(--h3-font-size);
+            color: var(--text-color-light);
+            margin-bottom: 2rem;
+        }
+
+        .home__description {
+            margin-bottom: 2.5rem;
+            color: var(--text-color);
+            max-width: 600px;
+            margin-inline: auto;
+        }
+
+        /*=============== BUTTON ===============*/
+        .button {
+            display: inline-block;
+            background-color: transparent;
+            color: var(--accent-color);
+            padding: 1rem 2rem;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            font-weight: var(--font-medium);
+            transition: .3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: rgba(100, 255, 218, 0.1);
+            z-index: -1;
+            transition: width 0.3s;
+        }
+
+        .button:hover::before {
+            width: 100%;
+        }
+
+        .button i {
+            font-size: 1.25rem;
+            margin-left: .5rem;
+            transition: .3s;
+        }
+
+        .button:hover i {
+            transform: translateX(.25rem);
+        }
+
+        /*=============== DASHBOARD CARDS ===============*/
+        .card {
+            background-color: var(--container-color);
+            padding: 1.75rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform .4s, box-shadow .4s;
+            border: none;
+        }
+
+        .card:hover {
+            transform: translateY(-.5rem);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card__title {
+            font-size: var(--h3-font-size);
+            margin-bottom: 1.25rem;
+            color: var(--white-color);
+        }
+
+        .card__data {
+            display: flex;
+            align-items: center;
+            column-gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card__data-number {
+            font-size: var(--h2-font-size);
+            font-weight: var(--font-bold);
+            color: var(--white-color);
+        }
+
+        .card__data-icon {
+            background-color: var(--accent-color);
+            color: var(--second-color);
+            padding: .75rem;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+        }
+
+        .card__description {
+            margin-bottom: 1.75rem;
+            color: var(--text-color-light);
+        }
+
+        /* Alert styles */
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background-color: var(--container-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        /* Canvas Chart Styles */
+        canvas {
+            width: 100% !important;
+            border-radius: 8px;
+        }
+
+        /* Mobile Navigation */
+        @media screen and (max-width: 768px) {
+            .nav__menu {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100%;
+                padding: 6rem 2rem 3.5rem;
+                background-color: var(--container-color);
+                box-shadow: -1px 0 4px rgba(0, 0, 0, .2);
+                transition: .4s;
+                z-index: var(--z-fixed);
+            }
+
+            .nav__list {
+                flex-direction: column;
+                row-gap: 2.5rem;
+            }
+
+            .nav__toggle {
+                display: inline-flex;
+                font-size: 1.5rem;
+                color: var(--white-color);
+                cursor: pointer;
+            }
+
+            .nav__close {
+                display: block;
+                font-size: 1.5rem;
+                position: absolute;
+                top: 1.25rem;
+                right: 1.25rem;
+                color: var(--white-color);
+                cursor: pointer;
+            }
+
+            .show-menu {
+                right: 0;
+            }
+        }
+
+        /* For smaller mobile devices */
+        @media screen and (max-width: 350px) {
+            .home__title {
+                font-size: 2rem;
+            }
+        }
+
+        /* For larger screens */
+        @media screen and (min-width: 1024px) {
+            :root {
+                --h1-font-size: 3rem;
+                --h2-font-size: 2rem;
+                --h3-font-size: 1.5rem;
+                --normal-font-size: 1.125rem;
+                --small-font-size: 1rem;
+                --smaller-font-size: .875rem;
+            }
+
+            .home__title {
+                font-size: 4rem;
+            }
+
+            .home__subtitle {
+                font-size: 2rem;
+            }
+        }
+        .card-header {
+        color: white !important;
+    }
+    .card-hover {
+    transition: box-shadow 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+    display: block; 
+}
+
+.card-hover:hover {
+    filter: brightness(115%);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+    </style>
+</head>
+<body>
+    <!--==================== HEADER ====================-->
+<header class="header" id="header">
+    <nav class="nav container">
+        <a href="{% url 'ingredient_forecast:dashboard' %}" class="nav__logo">
+            <i class="ri-restaurant-line nav__logo-icon"></i>
+            Restaurant Forecasting
+        </a>
+        
+        <div class="nav__menu" id="nav-menu">
+            <ul class="nav__list">
+                <li class="nav__item">
+                    <a href="{% url 'ingredient_forecast:dashboard' %}" class="nav__link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        Dashboard
+                    </a>
+                </li>
+                
+                <li class="nav__item">
+                    <a href="{% url 'ingredient_forecast:forecast_list' %}" class="nav__link {% if request.resolver_match.url_name == 'forecast_list' %}active{% endif %}">
+                        Forecast
+                    </a>
+                </li>
+                
+                <li class="nav__item">
+                    <a href="{% url 'ingredient_forecast:cost_forecast' %}" class="nav__link {% if request.resolver_match.url_name == 'cost_forecast' %}active{% endif %}">
+                        Cost
+                    </a>
+                </li>
+                
+                <!-- <li class="nav__item">
+                    <a href="{% url 'ingredient_forecast:forecast_settings' %}" class="nav__link {% if request.resolver_match.url_name == 'forecast_settings' %}active{% endif %}">
+                        Settings
+                    </a>
+                </li> -->
+                
+                <li class="nav__item">
+                    <a href="{% url 'ingredient_forecast:contributors' %}" class="nav__link {% if request.resolver_match.url_name == 'contributors' %}active{% endif %}">
+                        Contributors
+                    </a>
+                </li>
+
+                <li class="nav__item">
+                    <a href="/admin" class="nav__link">
+                        Admin
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Close Button -->
+            <div class="nav__close" id="nav-close">
+                <i class="ri-close-line"></i>
+            </div>
+        </div>
+        
+        <!-- Toggle Button -->
+        <div class="nav__toggle" id="nav-toggle">
+            <i class="ri-menu-line"></i>
+        </div>
+    </nav>
+</header>
+
+    <!--==================== MAIN ====================-->
+    <main class="main">
+
+        <!--==================== HOME ====================-->
+
+            
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Sidebar placeholder (optional) -->
+                    <!-- <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" id="sidebarMenu">
+                        Sidebar content here
+                    </nav> -->
+            
+                    <!-- Main content area -->
+                    <main class="col-12 px-md-4 py-4">
+                        <article class="card p-4">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+            
+                            {% block content %}{% endblock %}
+                        </article>
+                    </main>
+                </div>
+            </div>
+            
+                
+            </div>
+        </section>
+    </main>
+
+    <!--=============== SCROLLREVEAL ===============-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.min.js"></script>
+
+    <!--=============== BOOTSTRAP ===============-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--=============== CUSTOM JS ===============-->
+    <script>
+        /*=============== CHANGE BACKGROUND HEADER ===============*/
+        function scrollHeader() {
+            const header = document.getElementById('header');
+            // When the scroll is greater than 50 viewport height, add the scroll-header class
+            if (this.scrollY >= 50) {
+                header.classList.add('scroll-header');
+            } else {
+                header.classList.remove('scroll-header');
+            }
+        }
+        window.addEventListener('scroll', scrollHeader);
+
+        /*=============== SHOW MENU ===============*/
+        const navMenu = document.getElementById('nav-menu'),
+              navToggle = document.getElementById('nav-toggle'),
+              navClose = document.getElementById('nav-close');
+
+        /*===== MENU SHOW =====*/
+        /* Validate if constant exists */
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.add('show-menu');
+            });
+        }
+
+        /*===== MENU HIDDEN =====*/
+        /* Validate if constant exists */
+        if (navClose) {
+            navClose.addEventListener('click', () => {
+                navMenu.classList.remove('show-menu');
+            });
+        }
+
+        /*=============== REMOVE MENU MOBILE ===============*/
+        const navLink = document.querySelectorAll('.nav__link');
+
+        function linkAction() {
+            const navMenu = document.getElementById('nav-menu');
+            // When we click on each nav__link, we remove the show-menu class
+            navMenu.classList.remove('show-menu');
+        }
+        navLink.forEach(n => n.addEventListener('click', linkAction));
+
+        /*=============== CHARTS ===============*/
+        // Sample data for the forecast chart
+        const ctx = document.getElementById('forecastChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                    datasets: [
+                        {
+                            label: 'Forecasted',
+                            data: [65, 78, 82, 75, 88, 95],
+                            borderColor: '#64ffda',
+                            backgroundColor: 'rgba(100, 255, 218, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#64ffda'
+                        },
+                        {
+                            label: 'Actual',
+                            data: [62, 75, 79, 72, 85, 90],
+                            borderColor: '#a8b2d1',
+                            backgroundColor: 'rgba(168, 178, 209, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#a8b2d1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            grid: {
+                                color: 'rgba(168, 178, 209, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8892b0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(168, 178, 209, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8892b0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#e6f1ff'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#112240',
+                            titleColor: '#e6f1ff',
+                            bodyColor: '#a8b2d1',
+                            borderColor: '#64ffda',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /*=============== SCROLL REVEAL ANIMATION ===============*/
+        const sr = ScrollReveal({
+            origin: 'top',
+            distance: '60px',
+            duration: 2500,
+            delay: 400,
+            // reset: true
+        });
+
+        sr.reveal(`.home__title, .home__subtitle, .home__description`);
+        sr.reveal(`.section__title, .section__subtitle`, {delay: 200});
+        sr.reveal(`.card`, {delay: 400, distance: '20px', interval: 100});
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+{% extends 'ingredient_forecast/base.html' %}
+
+<style>
+    .card-header {
+        color: white !important;
+    }
+    .card-hover:hover {
+    filter: brightness(85%);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+</style>
+
+{% block title %}Dashboard - Restaurant Forecasting{% endblock %}
+
+{% block content %}
+
+<div class = "main">
+    <section class="home section">
+        <div class="container">
+            <div class="home__data">
+                <h1 class="home__title">Restaurant Forecasting</h1>
+                <h3 class="home__subtitle">Optimize your inventory and reduce waste</h3>
+                <p class="home__description">
+                    Our AI-powered forecasting system helps you predict ingredient needs, reduce waste, and maximize profits with up to 92% accuracy.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!--==================== DASHBOARD ====================-->
+    <section class="section">
+        <h2 class="section__title">Dashboard Overview</h2>
+        <span class="section__subtitle">Key metrics at a glance</span>
+</div>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'ingredient_forecast:forecast_list' %}" class="btn btn-sm btn-outline-primary">View Forecasts</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3 card-hover">
+            <div class="card-body">
+                <h5 class="card-title">Menu Items</h5>
+                <p class="card-text display-4">{{ menu_item_count }}</p>
+                <p class="card-text">{{ active_menu_items }} active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3 card-hover">
+            <div class="card-body">
+                <h5 class="card-title">Ingredients</h5>
+                <p class="card-text display-4">{{ ingredient_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3 card-hover">
+            <div class="card-body">
+                <h5 class="card-title">Categories</h5>
+                <p class="card-text display-4">{{ category_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary mb-3 card-hover">
+            <div class="card-body">
+                <h5 class="card-title">Forecast Settings</h5>
+                <p class="card-text">Forecasting next {{ settings.forecast_months }} months</p>
+                <p class="card-text">Using {{ settings.use_historical_months }} months of data</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recent Orders</span>
+                <a href="/admin/ingredient_forecast/order/add/" class="btn btn-sm btn-outline-primary">Add Order</a>
+            </div>
+            <div class="card-body">
+                {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Menu Item</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>{{ order.date }}</td>
+                                    <td>{{ order.menu_item.name }}</td>
+                                    <td>{{ order.quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <p class="mb-0">No recent orders found. Add some order data to generate forecasts.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark text-white shadow-sm border-0 rounded-4">
+            <div class="card-header border-bottom">
+                <h5 class="mb-0 fw-semibold">Getting Started</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">Welcome to the Restaurant Ingredient Forecasting system!</p>
+                <p>To get started:</p>
+                <ol>
+                    <li>Add your menu items, ingredients, and recipes through the 
+                        <a href="/admin" class="text-white text-decoration-underline">Admin Panel</a>
+                    </li>
+                    <li>Add historical order data for accurate forecasts</li>
+                    <li>Configure your 
+                        <a href="{% url 'ingredient_forecast:forecast_settings' %}" class="text-white text-decoration-underline">Forecast Settings</a>
+                    </li>
+                    <li>View your 
+                        <a href="{% url 'ingredient_forecast:forecast_list' %}" class="text-white text-decoration-underline">Ingredient Forecast</a>
+                    </li>
+                </ol>
+                <hr class="border-light">
+                <div class="d-grid gap-2">
+                    <a href="/admin/ingredient_forecast/ingredient/add/" class="btn btn-outline-success text-white">Add Ingredients</a>
+                    <a href="/admin/ingredient_forecast/menuitem/add/" class="btn btn-outline-primary text-white">Add Menu Items</a>
+                    <a href="/admin/ingredient_forecast/recipe/add/" class="btn btn-outline-info text-white">Add Recipes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

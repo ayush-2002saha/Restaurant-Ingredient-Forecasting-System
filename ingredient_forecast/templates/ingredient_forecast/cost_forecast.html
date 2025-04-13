@@ -1,0 +1,63 @@
+{% extends "ingredient_forecast/base.html" %}
+{% load static %}
+
+{% block title %}Ingredient Cost Forecast{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Ingredient Cost Forecast</h1>
+    
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4 text-white">
+            <label for="month_filter" class="form-label">Select Month</label>
+            <select class="form-select" id="month_filter" name="month">
+                <option value="">All Months</option>
+                {% for month in months %}
+                <option value="{{ month }}" {% if month == request.GET.month %}selected{% endif %}>{{ month }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 text-white">
+            <label for="ingredient_filter" class="form-label">Select Ingredient</label>
+            <select class="form-select" id="ingredient_filter" name="ingredient">
+                <option value="">All Ingredients</option>
+                {% for ingredient in ingredients %}
+                <option value="{{ ingredient.id }}" {% if ingredient.id|stringformat:"s" == request.GET.ingredient %}selected{% endif %}>{{ ingredient.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 align-self-end">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+    
+    <!-- Forecast Table -->
+    {% if forecasts %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Ingredient</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for forecast in forecasts %}
+            <tr>
+                <td>{{ forecast.month }}</td>
+                <td>{{ forecast.ingredient_name }}</td>
+                <td>{{ forecast.quantity }}</td>
+                <td>{{ forecast.unit }}</td>
+                <td>${{ forecast.cost }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning">No forecast data available for the selected filters.</div>
+    {% endif %}
+</div>
+{% endblock %}
