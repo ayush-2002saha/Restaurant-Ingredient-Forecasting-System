@@ -1,1 +1,4 @@
-[![Contributors](https://img.shields.io/github/contributors/your-username/your-repo)](https://github.com/your-username/your-repo/graphs/contributors)
+## 👥 Contributors
+
+- [@ayushsaha-ai](https://github.com/ayushsaha-ai) – Developer
+- [@ravi-dev](https://github.com/ravi-dev) – Backend Support
