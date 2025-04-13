@@ -2,6 +2,8 @@
 
 ![Contributors](https://img.shields.io/badge/contributors-6-blueviolet)
 
+![Sattwik Sen](https://github.com/Sattwiksen26)
+
 - [Sattwik Sen](https://github.com/Sattwiksen26)
 - [Vishal Mondal](https://github.com/MVishal01)
 - [Ayush Saha](https://github.com/ayush-2002saha)
