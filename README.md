@@ -1,6 +1,6 @@
 ## 👥 Contributors
 
-[![Contributors](https://img.shields.io/github/contributors/ayush-2002saha/Restaurant-Ingredient-Forecasting-System)]
+[![Contributors](6)
 - [Swapna Dip Mandal](https://github.com/sdm2204)
 - [Satyaki Ghosh](https://github.com/Satyaki-Ghosh)
 - [Sattwik Sen](https://github.com/Sattwiksen26)
