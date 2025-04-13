@@ -1,5 +1,6 @@
 ## 👥 Contributors
 
+[![Contributors](https://img.shields.io/github/contributors/ayush-2002saha/Restaurant-Ingredient-Forecasting-System)](https://github.com/ayush-2002saha/Restaurant-Ingredient-Forecasting-System/graphs/contributors)
 ![Contributors](https://img.shields.io/badge/contributors-6-blueviolet)
 
 - [Sattwik Sen](https://github.com/Sattwiksen26)
