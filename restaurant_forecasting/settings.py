@@ -74,7 +74,8 @@ DATABASES = {
 }
 
 # Allowed hosts setting
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']  # Add your domain or IP here
+ALLOWED_HOSTS = ['restaurant-ingredient-forecasting-system.onrender.com', 'localhost', '127.0.0.1']
+  # Add your domain or IP here
 
 # Debug setting
 DEBUG = True
